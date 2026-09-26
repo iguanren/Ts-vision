@@ -1,0 +1,6 @@
+# 泰山识图 Ts-vision:静态插件挂载(Host 半区)
+# 作为 dsh profile bundle 注册时,loader 自动加载;Client 半区由
+# dsh-client-modules 通过 dsh.client 声明 + exports["./client"] 发现。
+- insert:
+    - id: ts-vision
+      name: ts-vision
