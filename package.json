@@ -1,7 +1,7 @@
 {
   "name": "ts-vision",
   "description": "泰山识图 Ts-vision - 让 DSH 纯文本模型也能识图:GLM 视觉识别 + 所选模型推理(已适配 DSH 桌面客户端,重启永久生效)",
-  "version": "1.0.2",
+  "version": "1.2",
   "private": true,
   "files": [
     "lib",
