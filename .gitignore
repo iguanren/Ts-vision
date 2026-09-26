@@ -1,0 +1,15 @@
+# 构建/发行产物 —— 不进仓库,走 GitHub Releases 发布
+release-assets/
+.tgz-stage/
+
+# 依赖与本地运行残留
+node_modules/
+
+# 凭据(绝不可进仓库)
+*.credentials.yaml
+.credentials/
+
+# 系统与编辑器临时文件
+.DS_Store
+Thumbs.db
+*.log
