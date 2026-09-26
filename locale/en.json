@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Ts-vision",
+    "description": "Taishan vision - lets plain-text DSH models see images: GLM visual recognition + your selected model reasoning (desktop client, persists across restarts)"
+  }
+}
