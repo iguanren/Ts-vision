@@ -1,7 +1,7 @@
 # 泰山识图 Ts-vision
 
 [![license: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-[![version](https://img.shields.io/badge/version-1.0.2-green.svg)](https://github.com/iguanren/Ts-vision/releases)
+[![version](https://img.shields.io/github/v2/iguanren/Ts-vision?label=version)](https://github.com/iguanren/Ts-vision/releases)
 [![DSH ≥ 0.1.7](https://img.shields.io/badge/DSH-≥0.1.7-orange.svg)](https://github.com/deepseek-ai/deepseek-harness)
 
 <img src="https://community.codewave.163.com:443/upload/app/afaec238-82f5-4996-8fdd-0aae42f393de/DeepSeek_Harness_3K6U0FCguL_afaec238-82f5-4996-8fdd-0aae42f393de_efp9FOZ2_20260926181741629.png">
