@@ -1,15 +1,18 @@
-# 娉板北璇嗗浘 Ts-vision 路 DSH 妗岄潰瀹㈡埛绔畨瑁呰剼鏈?# ============================================================
-# 浠?GitHub 浠撳簱 https://github.com/iguanren/Ts-vision 鍏嬮殕/涓嬭浇鍚?
-# 鍦ㄦ湰浠撳簱鐩綍鍐呰繍琛?鑴氭湰鑷姩瀹氫綅鎵€鍦ㄧ洰褰?:
+# 泰山识图 Ts-vision · DSH 桌面客户端安装脚本
+# ============================================================
+# 从 GitHub 仓库 https://github.com/iguanren/Ts-vision 克隆/下载后,
+# 在本仓库目录内运行(脚本自动定位所在目录):
 #   powershell -NoProfile -ExecutionPolicy Bypass -File install-desktop.ps1
 #
-# 浣滅敤(鍏ㄧ▼涓嶅啓 npm,涓嶄緷璧?dsh CLI):
-#   1. 鎶婃彃浠舵枃浠跺鍒跺埌 ~/.dsh/profiles/desktop/node_modules/ts-vision
-#   2. 鏇存柊 desktop profile 鐨?package.json(dependencies + dsh.profile.bundles)
-#   3. 鍦?desktop/cordis.patch.yml 杩藉姞 ts-vision 鏉＄洰(宸插瓨鍦ㄥ垯璺宠繃)
-#   4. 鎻愮ず:zhipu-glm provider 澹版槑鐢辨彃浠跺惎鍔ㄦ椂鑷姩琛ュ啓,鏃犻渶鎵嬪伐閰嶇疆
+# 作用(全程不写 npm,不依赖 dsh CLI):
+#   1. 把插件文件复制到 ~/.dsh/profiles/desktop/node_modules/ts-vision
+#   2. 更新 desktop profile 的 package.json(dependencies + dsh.profile.bundles)
+#   3. 在 desktop/cordis.patch.yml 追加 ts-vision 条目(已存在则跳过)
+#   4. 提示:重启后在「插件」面板粘贴智谱 API Key 保存即可 —— 插件会经宿主
+#      settings 服务自动补写 zhipu-glm 提供方声明,无需手改配置
 #
-# 閲嶅杩愯鍗冲崌绾?鐩爣鐩綍鍏堟竻绌哄啀澶嶅埗,profile 鏉＄洰骞傜瓑杩藉姞銆?$ErrorActionPreference = "Stop"
+# 重复运行即升级:目标目录先清空再复制,profile 条目幂等追加。
+$ErrorActionPreference = "Stop"
 
 $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Profile = "desktop"
@@ -19,28 +22,28 @@ $ProfileDir = Join-Path $DshBase "profiles\$Profile"
 $NodeModulesDir = Join-Path $ProfileDir "node_modules"
 $PluginTarget = Join-Path $NodeModulesDir $Plugin
 
-# 鍙畨瑁呰繍琛屾椂蹇呴渶鏂囦欢(涓嶅惈鑴氭湰/鏂囨。/鏋勫缓娈嬬暀)
-$Files = @("lib", "locale", "package.json", "cordis.patch.yml")
+# 只安装运行时必需文件(不含脚本/文档/构建残留)
+$Files = @("lib", "locale", "package.json", "cordis.patch.yml", "icon.svg")
 
-Write-Host "== 娉板北璇嗗浘 Ts-vision 瀹夎鑴氭湰 =="
+Write-Host "== 泰山识图 Ts-vision 安装脚本 =="
 if (-not (Test-Path $ProfileDir)) {
-    throw "鎵句笉鍒?DSH profile 鐩綍: $ProfileDir (璇峰厛鍚姩涓€娆?DSH 瀹㈡埛绔?"
+    throw "找不到 DSH profile 目录: $ProfileDir (请先启动一次 DSH 客户端)"
 }
 foreach ($f in $Files) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
-        throw "浠撳簱缂哄皯 $f ,璇风‘璁ゅ湪 Ts-vision 浠撳簱鏍圭洰褰曡繍琛屾湰鑴氭湰: $RepoRoot"
+        throw "仓库缺少 $f ,请确认在 Ts-vision 仓库根目录运行本脚本: $RepoRoot"
     }
 }
 New-Item -ItemType Directory -Force -Path $NodeModulesDir | Out-Null
 
-# 1. 澶嶅埗鎻掍欢(鍏堟竻绌?閬垮厤鏃ф枃浠舵畫鐣?
+# 1. 复制插件(先清空,避免旧文件残留)
 if (Test-Path $PluginTarget) { Remove-Item -Recurse -Force $PluginTarget }
 foreach ($f in $Files) {
     Copy-Item -Recurse -Force -Path (Join-Path $RepoRoot $f) -Destination (Join-Path $PluginTarget $f)
 }
-Write-Host "[1/3] 宸插鍒舵彃浠跺埌 $PluginTarget"
+Write-Host "[1/3] 已复制插件到 $PluginTarget"
 
-# 2. 鏇存柊 package.json(dependencies + dsh.profile.bundles)
+# 2. 更新 package.json(dependencies + dsh.profile.bundles)
 $PkgPath = Join-Path $ProfileDir "package.json"
 $pkgText = Get-Content $PkgPath -Raw
 $pkg = $pkgText | ConvertFrom-Json
@@ -57,7 +60,7 @@ if ($bundles -notcontains $Plugin) {
     $pkg.dsh.profile | Add-Member -Force -NotePropertyName bundles -NotePropertyValue $bundles -MemberTypes NoteProperty
 }
 
-# 鎵嬪伐鎷?JSON,淇濇寔涓?DSH 鐢熸垚鐨勬牸寮忎竴鑷?2 绌烘牸缂╄繘)
+# 手工拼 JSON,保持与 DSH 生成的格式一致(2 空格缩进)
 $depsObj = [ordered]@{}
 foreach ($k in $pkg.dependencies.PSObject.Properties.Name) { $depsObj[$k] = $pkg.dependencies.$k }
 $json = @()
@@ -86,28 +89,28 @@ $json += "    }"
 $json += "  }"
 $json += "}"
 ($json -join "`n") | Set-Content $PkgPath -Encoding UTF8
-Write-Host "[2/3] 宸叉洿鏂?$PkgPath"
+Write-Host "[2/3] 已更新 $PkgPath"
 
-# 3. cordis.patch.yml 杩藉姞鏉＄洰
+# 3. cordis.patch.yml 追加条目
 $PatchPath = Join-Path $ProfileDir "cordis.patch.yml"
 if (Test-Path $PatchPath) {
     $yml = Get-Content $PatchPath -Raw
     $entry = "- id: ts-vision`n  disabled: false`n"
     if ($yml -notmatch "id:\s*ts-vision") {
         Add-Content -Path $PatchPath -Value $entry -Encoding UTF8
-        Write-Host "[3/3] 宸插湪 $PatchPath 杩藉姞 ts-vision 鏉＄洰"
+        Write-Host "[3/3] 已在 $PatchPath 追加 ts-vision 条目"
     } else {
-        Write-Host "[3/3] $PatchPath 宸叉湁 ts-vision 鏉＄洰,璺宠繃"
+        Write-Host "[3/3] $PatchPath 已有 ts-vision 条目,跳过"
     }
 } else {
     Set-Content -Path $PatchPath -Value "- id: ts-vision`n  disabled: false`n" -Encoding UTF8
-    Write-Host "[3/3] 鍒涘缓 $PatchPath 骞跺啓鍏?ts-vision 鏉＄洰"
+    Write-Host "[3/3] 创建 $PatchPath 并写入 ts-vision 条目"
 }
 
 Write-Host ""
-Write-Host "瀹屾垚!閲嶅惎 DSH 瀹㈡埛绔悗:"
-Write-Host "  1. 鎵撳紑宸︿晶銆屾彃浠躲€嶉潰鏉?鈫?ts-vision,绮樿创鏅鸿氨 API Key 淇濆瓨"
-Write-Host "     (Key 浠?https://open.bigmodel.cn 娉ㄥ唽鐢宠,鍏嶈垂)"
-Write-Host "  2. 鑻?zhipu-glm 鎻愪緵鏂瑰皻鏈敞鍐?鎻掍欢宸茶嚜鍔ㄥ啓鍏ュ０鏄?閲嶅惎涓€娆?DSH 瀹㈡埛绔悗"
-Write-Host "     GLM 妯″瀷鍑虹幇鍦ㄣ€屽彲鐢ㄨ瑙夋ā鍨嬨€嶅垪琛?鍗冲彲涓婁紶鍥剧墖璇嗗浘銆?
-
+Write-Host "完成!重启 DSH 客户端后:"
+Write-Host "  1. 打开左侧「插件」面板 → ts-vision,粘贴智谱 API Key 保存"
+Write-Host "     (Key 从 https://open.bigmodel.cn 注册申请,免费)"
+Write-Host "  2. 保存时插件会经宿主 settings 服务自动补写 zhipu-glm 提供方声明,"
+Write-Host "     宿主热注册后立即生效 —— 不用手改配置,也不用再重启"
+Write-Host "  3. 面板里的勾选、顺序、超时/温度会自动存盘"
