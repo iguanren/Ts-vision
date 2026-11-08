@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- 泰山识图:山形轮廓 + 眼睛 = 让纯文本模型"看见"图片 -->
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#1e293b"/>
+  <!-- 山 -->
+  <path d="M10 46 L24 24 L32 36 L38 28 L54 46 Z" fill="#38bdf8" opacity="0.35"/>
+  <!-- 眼睛 -->
+  <path d="M16 32 C 22 24, 42 24, 48 32 C 42 40, 22 40, 16 32 Z" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linejoin="round"/>
+  <circle cx="32" cy="32" r="5" fill="#facc15"/>
+  <!-- 闪光 -->
+  <path d="M50 14 L 51.6 18.4 L 56 20 L 51.6 21.6 L 50 26 L 48.4 21.6 L 44 20 L 48.4 18.4 Z" fill="#facc15"/>
+</svg>
